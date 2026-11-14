@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="description" content="Download and update Foundry VTT modules." />
+    <title>Foundry modules</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/mark-Ctw0SEc2.svg" />
+    <script type="module" crossorigin src="/assets/index-B_cYFMKd.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-kfxEpIKl.css">
+  </head>
+  <body class="bg-base-200 text-base-content min-h-screen">
+    <nav class="navbar bg-base-100 border-base-300 border-b px-4 sm:px-6" aria-label="Main">
+      <div class="min-w-0 flex-1">
+        <a href="#/" class="rounded-field block min-w-0"
+          ><h1 class="truncate text-base font-semibold sm:text-lg">Foundry modules</h1></a
+        >
+      </div>
+      <div class="flex flex-none items-center gap-1">
+        <div id="nav-links" class="flex gap-1" hidden>
+          <a id="nav-library" href="#/" class="btn btn-sm btn-ghost">Modules</a>
+          <a id="nav-admin" href="#/admin" class="btn btn-sm btn-ghost">Admin</a>
+        </div>
+        <div id="nav-account" class="flex items-center gap-1" hidden>
+          <span
+            id="account-email"
+            class="text-base-content/70 hidden max-w-56 truncate px-2 text-sm md:inline"
+          ></span>
+          <button class="btn btn-sm btn-ghost hidden sm:inline-flex" id="refresh">Refresh</button>
+          <button class="btn btn-sm btn-ghost" id="signout">Sign out</button>
+        </div>
+      </div>
+    </nav>
+    <main class="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
+      <section id="setup" class="alert alert-warning alert-soft" hidden>
+        <div>
+          <h2 class="font-semibold">Setup incomplete</h2>
+          <p>Account services have not been connected. Sign-in and downloads are unavailable.</p>
+        </div>
+      </section>
+
+      <div id="view-library" class="space-y-6">
+        <section id="directory" class="space-y-3" hidden>
+          <h2 class="text-lg font-semibold">Modules</h2>
+          <div id="directory-modules" class="grid gap-3 sm:grid-cols-2"></div>
+        </section>
+        <section id="auth" class="card card-border bg-base-100" hidden>
+          <div class="card-body">
+            <h2 class="card-title text-lg">Sign in</h2>
+            <form id="signin">
+              <fieldset class="fieldset">
+                <label class="label" for="email">Email address</label>
+                <div class="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    id="email"
+                    class="input w-full sm:flex-1"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                    maxlength="254"
+                  />
+                  <button class="btn btn-primary">Send sign-in link</button>
+                </div>
+                <p class="label whitespace-normal">
+                  Signing in for the first time creates an account. It does not grant module access.
+                </p>
+              </fieldset>
+            </form>
+          </div>
+        </section>
+        <section id="library" class="space-y-3" hidden>
+          <h2 class="text-lg font-semibold">Modules</h2>
+          <div id="modules" class="grid gap-3 sm:grid-cols-2"></div>
+          <section id="request-history" class="card card-border bg-base-100" hidden>
+            <div class="card-body">
+              <h3 class="card-title text-base">Your requests</h3>
+              <ul id="requests" class="space-y-1 text-sm"></ul>
+            </div>
+          </section>
+        </section>
+        <section class="space-y-3">
+          <h2 class="text-lg font-semibold">Installation</h2>
+          <ol class="space-y-2 pl-6 [list-style-type:decimal]">
+            <li>For a public module, copy its manifest URL. No sign-in is needed.</li>
+            <li>
+              For a private module, sign in and request access first. Once approved, generate a
+              link; it expires after 30 minutes.
+            </li>
+            <li>
+              In Foundry, open <strong>Add-on Modules → Install Module</strong> for modules, or
+              <strong>Game Systems → Install System</strong> for systems, and paste the link into
+              <strong>Manifest URL</strong>.
+            </li>
+          </ol>
+          <details class="collapse collapse-arrow border-base-300 bg-base-100 border">
+            <summary class="collapse-title font-semibold">Updating an installed module</summary>
+            <div class="collapse-content text-sm">
+              <p>
+                Public modules update through their original manifest URL. For private and secret
+                modules, generate a link for the new version and use Install Module (or Install
+                System) again. The matching package ID replaces the existing installation. Back up
+                any edits to module files or compendiums first. Private modules can expose version
+                notices, but automatic downloads are unavailable. Secret modules have no public
+                version notices; check this site for their updates.
+              </p>
+            </div>
+          </details>
+          <details class="collapse collapse-arrow border-base-300 bg-base-100 border">
+            <summary class="collapse-title font-semibold">Download limits and replacements</summary>
+            <div class="collapse-content text-sm">
+              <p>
+                Private and secret releases include one download. A link is used when the ZIP
+                transfer starts, even if it fails. To try again or get another copy, select Request
+                replacement and explain why. An administrator must approve it. Do not share
+                installation links.
+              </p>
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <section id="admin" class="space-y-4" hidden>
+        <h2 class="text-lg font-semibold">Admin</h2>
+        <div role="tablist" class="tabs tabs-border" aria-label="Admin sections">
+          <button id="tab-modules" role="tab" class="tab" aria-controls="panel-modules">
+            Modules
+          </button>
+          <button id="tab-requests" role="tab" class="tab gap-2" aria-controls="panel-requests">
+            Requests <span id="queue-count" class="badge badge-sm" hidden></span>
+          </button>
+          <button id="tab-people" role="tab" class="tab" aria-controls="panel-people">
+            People
+          </button>
+        </div>
+
+        <div id="panel-modules" role="tabpanel" aria-labelledby="tab-modules" class="space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="text-base-content/70 text-sm">
+              Public modules link to their own manifest. Private and secret modules are uploaded by
+              the release script.
+            </p>
+            <button id="add-module" class="btn btn-sm btn-primary">Add module</button>
+          </div>
+          <div class="card card-border bg-base-100">
+            <div class="max-w-full overflow-x-auto">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Module</th>
+                    <th>Visibility</th>
+                    <th>Latest</th>
+                    <th><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="admin-modules"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-requests" role="tabpanel" aria-labelledby="tab-requests" hidden>
+          <ul id="queue" class="list bg-base-100 border-base-300 rounded-box border"></ul>
+        </div>
+
+        <div
+          id="panel-people"
+          role="tabpanel"
+          aria-labelledby="tab-people"
+          class="space-y-4"
+          hidden
+        >
+          <div class="card card-border bg-base-100">
+            <div class="card-body min-w-0">
+              <h3 class="card-title text-base">Accounts</h3>
+              <p class="text-base-content/70 text-sm">
+                Switch on a module to let that account download it. Unlimited accounts can make as
+                many links as they like, but still need each module switched on.
+              </p>
+              <div class="max-w-full overflow-x-auto">
+                <table class="table table-sm">
+                  <thead id="people-head"></thead>
+                  <tbody id="policies"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="card card-border bg-base-100">
+            <div class="card-body min-w-0">
+              <h3 class="card-title text-base">Grant by email</h3>
+              <p class="text-base-content/70 text-sm">
+                Give someone access before they have an account. It applies once they sign in with
+                that email. A switch set in Accounts above overrides it.
+              </p>
+              <form id="email-access-form" class="flex flex-col gap-2 sm:flex-row sm:items-end">
+                <fieldset class="fieldset sm:w-48">
+                  <label class="label" for="email-access-module">Module</label>
+                  <select
+                    id="email-access-module"
+                    class="select select-sm w-full"
+                    required
+                  ></select>
+                </fieldset>
+                <fieldset class="fieldset sm:flex-1">
+                  <label class="label" for="email-access-address">Email address</label>
+                  <input
+                    id="email-access-address"
+                    class="input input-sm w-full"
+                    type="email"
+                    required
+                    maxlength="254"
+                  />
+                </fieldset>
+                <button class="btn btn-sm sm:mb-1">Grant</button>
+              </form>
+              <div class="max-w-full overflow-x-auto">
+                <table class="table table-sm">
+                  <tbody id="email-access-list"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer footer-center text-base-content/70 p-4 text-xs">
+      <p>Not affiliated with Foundry Virtual Tabletop.</p>
+    </footer>
+
+    <div class="toast toast-end z-10">
+      <div id="notice" role="status" aria-live="polite" hidden>
+        <span id="notice-text"></span>
+        <button id="notice-close" class="btn btn-xs btn-ghost" aria-label="Dismiss">✕</button>
+      </div>
+    </div>
+
+    <dialog id="module-dialog" class="modal" aria-labelledby="module-dialog-title">
+      <div class="modal-box">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute top-2 right-2" aria-label="Close">
+            ✕
+          </button>
+        </form>
+        <h2 id="module-dialog-title" class="text-lg font-semibold">Add module</h2>
+        <form id="module-form">
+          <fieldset class="fieldset">
+            <label class="label" for="module-id">Module ID</label>
+            <input
+              id="module-id"
+              class="input w-full font-mono"
+              required
+              pattern="[a-z0-9][a-z0-9-]*"
+            />
+            <label class="label" for="module-title">Title</label>
+            <input id="module-title" class="input w-full" required maxlength="200" />
+            <label class="label" for="module-description">Description (optional)</label>
+            <textarea
+              id="module-description"
+              class="textarea w-full"
+              maxlength="2000"
+              rows="3"
+            ></textarea>
+            <label class="label" for="module-visibility">Visibility</label>
+            <select id="module-visibility" class="select w-full">
+              <option value="public">Public — anyone can copy the manifest URL</option>
+              <option value="private">Private — listed, approval required</option>
+              <option value="secret">Secret — hidden except from approved accounts</option>
+            </select>
+            <div id="module-manifest-field" class="fieldset p-0">
+              <label class="label" for="module-manifest">Manifest URL</label>
+              <input
+                id="module-manifest"
+                class="input w-full font-mono text-sm"
+                type="url"
+                placeholder="https://github.com/…/releases/latest/download/module.json"
+              />
+            </div>
+            <p id="module-visibility-note" class="label whitespace-normal"></p>
+          </fieldset>
+          <div class="modal-action">
+            <button class="btn btn-primary">Save module</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <dialog id="ticket-dialog" class="modal" aria-labelledby="ticket-title">
+      <div class="modal-box">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute top-2 right-2" aria-label="Close">
+            ✕
+          </button>
+        </form>
+        <h2 id="ticket-title" class="text-lg font-semibold">Installation link</h2>
+        <p class="py-2 text-sm">
+          Copy this into <strong>Install Module → Manifest URL</strong>, or
+          <strong>Install System → Manifest URL</strong> for a game system. Don’t open it to test
+          the download or share it. The link is only shown here, not saved in this browser.
+        </p>
+        <fieldset class="fieldset">
+          <label class="label" for="ticket-url">Temporary manifest URL</label>
+          <input id="ticket-url" class="input w-full font-mono text-xs" readonly />
+          <p id="ticket-expiry" class="label whitespace-normal"></p>
+        </fieldset>
+        <div class="modal-action">
+          <button id="copy-ticket" class="btn btn-primary">Copy link</button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <dialog id="request-dialog" class="modal" aria-labelledby="request-title">
+      <div class="modal-box">
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost absolute top-2 right-2" aria-label="Close">
+            ✕
+          </button>
+        </form>
+        <h2 id="request-title" class="text-lg font-semibold">Request access</h2>
+        <form id="request-form">
+          <fieldset class="fieldset">
+            <label class="label" for="reason">Reason for your request</label>
+            <textarea
+              id="reason"
+              class="textarea w-full"
+              required
+              minlength="10"
+              maxlength="2000"
+              rows="5"
+              placeholder="Your game, or why you need a replacement"
+            ></textarea>
+          </fieldset>
+          <div class="modal-action">
+            <button class="btn">Send request</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+  </body>
+</html>
